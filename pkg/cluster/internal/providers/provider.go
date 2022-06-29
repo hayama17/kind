@@ -23,27 +23,24 @@ import (
 	"sigs.k8s.io/kind/pkg/internal/cli"
 )
 
-// Provider represents a provider of cluster / node infrastructure
-// This is an alpha-grade internal API
+// Provider represents a provider of cluster / node infrastructure(DockerやPodmanの事)
+// This is an alpha-grade internal API(内部APIだよ)
 type Provider interface {
-	// Provision should create and start the nodes, just short of
-	// actually starting up Kubernetes, based on the given cluster config
+	// Provision では、K8sを作成する前に必要なノードの起動をcluster configに基づいて行う
 	Provision(status *cli.Status, cfg *config.Cluster) error
-	// ListClusters discovers the clusters that currently have resources
-	// under this providers
+	// ListClustersはリソースからプロバイダ配下のクラスタの検出を行う？
 	ListClusters() ([]string, error)
-	// ListNodes returns the nodes under this provider for the given
-	// cluster name, they may or may not be running correctly
+	// ListNodesはクラスタ名からプロバイダ配下にあるノードを返す
 	ListNodes(cluster string) ([]nodes.Node, error)
-	// DeleteNodes deletes the provided list of nodes
+	// DeleteNodes は指定されたノードのリストを削除する。
 	// These should be from results previously returned by this provider
 	// E.G. by ListNodes()
 	DeleteNodes([]nodes.Node) error
-	// GetAPIServerEndpoint returns the host endpoint for the cluster's API server
+	// GetAPIServerEndpointは、クラスターのAPIサーバーのホストエンドポイントを返します。
 	GetAPIServerEndpoint(cluster string) (string, error)
-	// GetAPIServerEndpoint returns the internal network endpoint for the cluster's API server
+	// GetAPIServerEndpointは、クラスターのAPIサーバーの内部ネットワークエンドポイントを返します。
 	GetAPIServerInternalEndpoint(cluster string) (string, error)
-	// CollectLogs will populate dir with cluster logs and other debug files
+	// CollectLogsは、クラスタログおよびその他のデバッグファイルをdirに格納します。
 	CollectLogs(dir string, nodes []nodes.Node) error
 	// Info returns the provider info
 	Info() (*ProviderInfo, error)

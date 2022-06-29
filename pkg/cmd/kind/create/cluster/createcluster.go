@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/kind/pkg/internal/runtime"
 )
 
+//flagはオプションのやつ--name=name --image=k8sv1.6.1とかを管理する構造体
 type flagpole struct {
 	Name       string
 	Config     string
@@ -45,17 +46,17 @@ type flagpole struct {
 // NewCommand returns a new cobra.Command for cluster creation
 func NewCommand(logger log.Logger, streams cmd.IOStreams) *cobra.Command {
 	flags := &flagpole{}
-	cmd := &cobra.Command{
-		Args:  cobra.NoArgs,
-		Use:   "cluster",
-		Short: "Creates a local Kubernetes cluster",
-		Long:  "Creates a local Kubernetes cluster using Docker container 'nodes'",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cli.OverrideDefaultName(cmd.Flags())
+	cmd := &cobra.Command{//cmdの値を上書き
+		Args:  cobra.NoArgs,//引数あればエラー
+		Use:   "cluster",//コマンド名
+		Short: "Creates a local Kubernetes cluster",//説明
+		Long:  "Creates a local Kubernetes cluster using Docker container 'nodes'",//説明
+		RunE: func(cmd *cobra.Command, args []string) error {//処理
+			cli.OverrideDefaultName(cmd.Flags())//クラスターの名前の上書きする処理
 			return runE(logger, streams, flags)
 		},
 	}
-	cmd.Flags().StringVar(&flags.Name, "name", "", "cluster name, overrides KIND_CLUSTER_NAME, config (default kind)")
+	cmd.Flags().StringVar(&flags.Name, "name", "", "cluster name, overrides KIND_CLUSTER_NAME, config (default kind)")//Flag構造体のName変数のフラグ名name、デフォルト値,説明
 	cmd.Flags().StringVar(&flags.Config, "config", "", "path to a kind config file")
 	cmd.Flags().StringVar(&flags.ImageName, "image", "", "node docker image to use for booting the cluster")
 	cmd.Flags().BoolVar(&flags.Retain, "retain", false, "retain nodes for debugging when cluster creation fails")

@@ -49,13 +49,14 @@ func defaultName(name string) string {
 	return name
 }
 
-// Provider is used to perform cluster operations
+// Provider is used to perform cluster operations(操作)
+// dockerやpodmanの操作を抽象化したやつかも？
 type Provider struct {
 	provider internalproviders.Provider
 	logger   log.Logger
 }
 
-// NewProvider returns a new provider based on the supplied options
+// NewProviderは、指定されたオプションに基づいて新しいProviderを返します。
 func NewProvider(options ...ProviderOption) *Provider {
 	p := &Provider{
 		logger: log.NoopLogger{},
@@ -76,19 +77,16 @@ func NewProvider(options ...ProviderOption) *Provider {
 
 	// ensure a provider if none was set
 	// NOTE: depends on logger being set (see sorting above)
-	if p.provider == nil {
-		// DetectNodeProvider does not fallback to allow callers to determine
-		// this behavior
-		// However for compatibility if the caller of NewProvider supplied no
-		// option and we autodetect internally, we default to the docker provider
-		// for fallback, to avoid a breaking change for now.
-		// This may change in the future.
-		// TODO: consider breaking this API for earlier errors.
-		providerOpt, _ := DetectNodeProvider()
+	if p.provider == nil {//provider＝コンテナランタン　の確認
+
+		
+
+
+		providerOpt, _ := DetectNodeProvider()//わかるならここで代入
 		if providerOpt == nil {
-			providerOpt = ProviderWithDocker()
+			providerOpt = ProviderWithDocker()//分からないならDockerで処理
 		}
-		providerOpt.apply(p)
+		providerOpt.apply(p)//providerをDockerの処理に設定する
 	}
 	return p
 }
