@@ -66,12 +66,13 @@ func NewCommand(logger log.Logger, streams cmd.IOStreams) *cobra.Command {
 }
 
 func runE(logger log.Logger, streams cmd.IOStreams, flags *flagpole) error {
+	//コンテナランタイムに合わせたproviderの作成を行う
 	provider := cluster.NewProvider(
 		cluster.ProviderWithLogger(logger),
 		runtime.GetDefault(logger),
 	)
 
-	// handle config flag, we might need to read from stdin
+	// KinDのconfigfileを生データを引数にするか？ファイルパスを引数にするかで処理が変わる
 	withConfig, err := configOption(flags.Config, streams.In)
 	if err != nil {
 		return err
@@ -84,7 +85,7 @@ func runE(logger log.Logger, streams cmd.IOStreams, flags *flagpole) error {
 		cluster.CreateWithNodeImage(flags.ImageName),
 		cluster.CreateWithRetain(flags.Retain),
 		cluster.CreateWithWaitForReady(flags.Wait),
-		cluster.CreateWithKubeconfigPath(flags.Kubeconfig),
+		cluster.CreateWithKubeconfigPath(flags.Kubeconfig),//コントロールプレーンへ接続する為の署名やサブネットとか色々k8sのデフォルトの機能
 		cluster.CreateWithDisplayUsage(true),
 		cluster.CreateWithDisplaySalutation(true),
 	); err != nil {

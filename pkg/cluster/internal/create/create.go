@@ -50,7 +50,7 @@ const (
 
 // ClusterOptions holds cluster creation options
 type ClusterOptions struct {
-	Config       *config.Cluster
+	Config       *config.Cluster//clusterのコンフィグ
 	NameOverride string // overrides config.Name
 	// NodeImage overrides the nodes' images in Config if non-zero
 	NodeImage      string
@@ -66,7 +66,7 @@ type ClusterOptions struct {
 
 // Cluster creates a cluster
 func Cluster(logger log.Logger, p providers.Provider, opts *ClusterOptions) error {
-	// validate provider first
+	// provider の検証を行う
 	if err := validateProvider(p); err != nil {
 		return err
 	}
@@ -76,30 +76,30 @@ func Cluster(logger log.Logger, p providers.Provider, opts *ClusterOptions) erro
 		return err
 	}
 
-	// Check if the cluster name already exists
+	// クラスタが既に存在しているか確認
 	if err := alreadyExists(p, opts.Config.Name); err != nil {
 		return err
 	}
 
-	// warn if cluster name might typically be too long
+	// クラスタ名の長い過ぎる時には警告
 	if len(opts.Config.Name) > clusterNameMax {
 		logger.Warnf("cluster name %q is probably too long, this might not work properly on some systems", opts.Config.Name)
 	}
 
-	// then validate
+	// Configの検証
 	if err := opts.Config.Validate(); err != nil {
 		return err
 	}
 
-	// setup a status object to show progress to the user
+	// 進行状況を表示するやつ
 	status := cli.StatusForLogger(logger)
 
-	// we're going to start creating now, tell the user
+	//　ユーザに今から作るよ～って表示
 	logger.V(0).Infof("Creating cluster %q ...\n", opts.Config.Name)
 
-	// Create node containers implementing defined config Nodes
+	// configに合わせてノードコンテナを作成する
 	if err := p.Provision(status, opts.Config); err != nil {
-		// In case of errors nodes are deleted (except if retain is explicitly set)
+		// エラーの場合は削除 (except if retain is explicitly set)
 		if !opts.Retain {
 			_ = delete.Cluster(logger, p, opts.Config.Name, opts.KubeconfigPath)
 		}
@@ -111,12 +111,12 @@ func Cluster(logger log.Logger, p providers.Provider, opts *ClusterOptions) erro
 		loadbalancer.NewAction(), // setup external loadbalancer
 		configaction.NewAction(), // setup kubeadm config
 	}
-	if !opts.StopBeforeSettingUpKubernetes {
+	if !opts.StopBeforeSettingUpKubernetes {//k8sを設定する前に停止するオプションがoffなら
 		actionsToRun = append(actionsToRun,
 			kubeadminit.NewAction(opts.Config), // run kubeadm init
 		)
-		// this step might be skipped, but is next after init
-		if !opts.Config.Networking.DisableDefaultCNI {
+		// kubeadmの次のステップ
+		if !opts.Config.Networking.DisableDefaultCNI {//CNIをデフォルトで実装する場合
 			actionsToRun = append(actionsToRun,
 				installcni.NewAction(), // install CNI
 			)

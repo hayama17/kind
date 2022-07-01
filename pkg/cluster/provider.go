@@ -166,7 +166,7 @@ func ProviderWithPodman() ProviderOption {
 	})
 }
 
-// Create provisions and starts a kubernetes-in-docker cluster
+// 初期設定をして、k8s in Dockerを作る
 func (p *Provider) Create(name string, options ...CreateOption) error {
 	// apply options
 	opts := &internalcreate.ClusterOptions{
